@@ -7,6 +7,7 @@ const app = express();
 const mongoose = require("mongoose");
 const mongoSanitize = require("express-mongo-sanitize");
 const methodOverride = require("method-override");
+const cors = require("cors")
 const compression = require("compression");
 const helmet = require("helmet");
 
@@ -41,6 +42,9 @@ app.use(
   })
 );
 
+// Allow requests from frontend
+app.use(cors())
+
 // Minimize size of app
 app.use(compression());
 
@@ -49,6 +53,12 @@ app.use(helmet());
 
 // Use defined routes
 app.use(indexRouter);
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.log("ERROR", err.message);
+  return res.status(400).json({message: err.message})
+})
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
