@@ -10,6 +10,8 @@ const issueJWT = require("../utils/issueJWT");
 
 router.get("/", index.home);
 
+// router.get("/list", index.list);
+
 // Register new user
 router.post(
   "/register",
