@@ -13,7 +13,8 @@ const helmet = require("helmet");
 
 // Routes from routes folder
 const indexRouter = require("./routes/index");
-const user = require("./models/user");
+const stocksRouter = require("./routes/stocks")
+
 
 // Database connection
 const dbUrl = process.env.DB_URL || "mongodb://localhost/stocks";
@@ -102,7 +103,8 @@ passport.use(
 app.use(passport.initialize());
 
 // Use defined routes
-app.use(indexRouter);
+app.use("/", indexRouter);
+app.use("/stocks",stocksRouter);
 
 // Error handler
 app.use((err, req, res, next) => {

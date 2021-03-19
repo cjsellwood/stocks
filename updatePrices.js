@@ -17,37 +17,14 @@ db.once("open", () => {
   console.log(`${dbUrl} connected`);
 });
 
-const top20 = [
-  "AAPL",
-  "MSFT",
-  "AMZN",
-  "GOOG",
-  "GOOGL",
-  "FB",
-  "TSLA",
-  "TSM",
-  "BABA",
-  "BRK.A",
-  "BRK.B",
-  "V",
-  "JPM",
-  "JNJ",
-  "MA",
-  "WMT",
-  "DIS",
-  "UNH",
-  "NVDA",
-  "BAC",
-];
-
-const seedStocks = async () => {
-  await Stock.deleteMany({});
-
-  // Create mongo entry for each stock
-  for (let symbol of top20) {
+const updatePrices = async () => {
+  // Find all stocks in database
+  const stocks = await Stock.find();
+  for (let stock of stocks) {
+    // Get new quote
     const result = await axios
       .get(
-        `https://cloud.iexapis.com/stable/stock/${symbol}/quote?token=${process.env.API_KEY}`
+        `https://cloud.iexapis.com/stable/stock/${stock.symbol}/quote?token=${process.env.API_KEY}`
       )
       .then((response) => {
         console.log("response", response);
@@ -57,16 +34,11 @@ const seedStocks = async () => {
         console.log(err);
       });
 
-    const stock = new Stock({
-      symbol: result.symbol,
-      companyName: result.companyName,
-      prices: [result.latestPrice],
-      lastUpdated: new Date(Date.now()),
+    // Add new price to database entry and limit to 7 prices
+    await Stock.findByIdAndUpdate(stock._id, {
+      $push: { prices: { $each: [result.latestPrice], $slice: -7 } },
     });
-    await stock.save();
   }
 };
 
-seedStocks().then(() => {
-  mongoose.connection.close();
-});
+updatePrices();
