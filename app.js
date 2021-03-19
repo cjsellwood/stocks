@@ -62,24 +62,24 @@ const ExtractJwt = require("passport-jwt").ExtractJwt;
 const opts = {};
 
 // Passport authentication
-passport.use(
-  new LocalStrategy(
-    {
-      session: false,
-    },
+// passport.use(
+//   new LocalStrategy(
+//     {
+//       session: false,
+//     },
 
-    catchAsync(async (username, password, done) => {
-      const user = await User.findOne({ username: username });
-      if (!user) {
-        return done(null, false, { message: "Incorrect username or password" });
-      }
-      if (!bcrypt.compare(password, user.password)) {
-        return done(null, false, { message: "Incorrect username or password" });
-      }
-      return done(null, user);
-    })
-  )
-);
+//     catchAsync(async (username, password, done) => {
+//       const user = await User.findOne({ username: username });
+//       if (!user) {
+//         return done(null, false, { message: "Incorrect username or password" });
+//       }
+//       if (!bcrypt.compare(password, user.password)) {
+//         return done(null, false, { message: "Incorrect username or password" });
+//       }
+//       return done(null, user);
+//     })
+//   )
+// );
 
 // In react - Authorization: bearer token
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
@@ -89,7 +89,6 @@ passport.use(
   new JwtStrategy(
     opts,
     async (payload, done) => {
-      console.log(payload)
       const user = await User.findOne({ _id: payload.sub });
       if (user) {
         return done(null, user);
@@ -108,7 +107,7 @@ app.use(indexRouter);
 // Error handler
 app.use((err, req, res, next) => {
   console.log("ERROR", err.message);
-  return res.status(400).json({ message: err.message });
+  return res.status(err.statusCode).json({ message: err.message });
 });
 
 const port = process.env.PORT || 3000;
