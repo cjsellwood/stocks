@@ -13,8 +13,7 @@ const helmet = require("helmet");
 
 // Routes from routes folder
 const indexRouter = require("./routes/index");
-const stocksRouter = require("./routes/stocks")
-
+const stocksRouter = require("./routes/stocks");
 
 // Database connection
 const dbUrl = process.env.DB_URL || "mongodb://localhost/stocks";
@@ -53,58 +52,32 @@ app.use(compression());
 // Secure app
 app.use(helmet());
 
+// Passport with jwt configuration
 const passport = require("passport");
-const LocalStrategy = require("passport-local").Strategy;
 const User = require("./models/user");
-const bcrypt = require("bcrypt");
-const catchAsync = require("./utils/catchAsync");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const opts = {};
 
-// Passport authentication
-// passport.use(
-//   new LocalStrategy(
-//     {
-//       session: false,
-//     },
-
-//     catchAsync(async (username, password, done) => {
-//       const user = await User.findOne({ username: username });
-//       if (!user) {
-//         return done(null, false, { message: "Incorrect username or password" });
-//       }
-//       if (!bcrypt.compare(password, user.password)) {
-//         return done(null, false, { message: "Incorrect username or password" });
-//       }
-//       return done(null, user);
-//     })
-//   )
-// );
-
-// In react - Authorization: bearer token
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.JWT_PRIVATE;
 
 passport.use(
-  new JwtStrategy(
-    opts,
-    async (payload, done) => {
-      const user = await User.findOne({ _id: payload.sub });
-      if (user) {
-        return done(null, user);
-      } else {
-        return done(null, false);
-      }
+  new JwtStrategy(opts, async (payload, done) => {
+    const user = await User.findOne({ _id: payload.sub });
+    if (user) {
+      return done(null, user);
+    } else {
+      return done(null, false);
     }
-  )
+  })
 );
 
 app.use(passport.initialize());
 
 // Use defined routes
 app.use("/", indexRouter);
-app.use("/stocks",stocksRouter);
+app.use("/stocks", stocksRouter);
 
 // Error handler
 app.use((err, req, res, next) => {

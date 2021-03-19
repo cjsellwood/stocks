@@ -1,10 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const index = require("../controllers/index");
-
-const { validateRegister, validateLogin } = require("../middleware");
 const passport = require("passport");
-
+const index = require("../controllers/index");
+const { validateRegister, validateLogin } = require("../middleware");
 
 router.get("/", index.home);
 
@@ -13,15 +11,6 @@ router.post("/register", validateRegister, index.registerUser);
 
 // Login a user
 router.post("/login", validateLogin, index.loginUser);
-
-// Test route thats only for authenticated users
-router.get(
-  "/protected",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    res.json({ message: "You are authorized" });
-  }
-);
 
 // Return search results
 router.get(

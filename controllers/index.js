@@ -39,6 +39,7 @@ module.exports.registerUser = catchAsync(async (req, res, next) => {
     message: "user registered",
     token: jwt.token,
     expiresIn: jwt.expiresIn,
+    cash: user.cash
   });
 });
 
@@ -52,13 +53,14 @@ module.exports.loginUser = catchAsync(async (req, res, next) => {
   }
   const isValid = bcrypt.compare(password, user.password);
 
-  // If username and password correct issue JWT token
+  // If username and password correct, issue JWT token
   if (isValid) {
     const jwt = issueJWT(user);
     res.status(200).json({
       message: "Logged In",
       token: jwt.token,
       expiresIn: jwt.expiresIn,
+      cash: user.cash
     });
   } else {
     res.status(401).json({ message: "Incorrect username or password" });

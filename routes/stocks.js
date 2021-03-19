@@ -1,7 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const stocks = require("../controllers/stocks")
+const passport = require("passport")
+const stocks = require("../controllers/stocks");
 
-router.get("/", stocks.allStocks)
+router.get(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  stocks.allStocks
+);
 
 module.exports = router;

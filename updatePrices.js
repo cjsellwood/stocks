@@ -42,3 +42,4 @@ const updatePrices = async () => {
 };
 
 updatePrices();
+console.log("DONE");
