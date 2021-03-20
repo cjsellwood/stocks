@@ -19,6 +19,4 @@ router.get(
   index.search
 );
 
-router.get("/stocks/:symbol", index.getStock);
-
 module.exports = router;

@@ -105,24 +105,3 @@ module.exports.search = catchAsync(async (req, res, next) => {
     res.json(stock);
   }
 });
-
-module.exports.getStock = catchAsync(async (req, res, next) => {
-  const symbol = req.params.symbol;
-  const result = await axios
-    .get(
-      `https://cloud.iexapis.com/stable/stock/${symbol}/quote?token=${process.env.API_KEY}`
-    )
-    .then((response) => {
-      console.log("response", response);
-      return response.data;
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  console.log("result", result);
-  res.json({
-    symbol: result.symbol,
-    companyName: result.companyName,
-    price: result.latestPrice,
-  });
-});
