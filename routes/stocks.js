@@ -15,4 +15,10 @@ router.post(
   stocks.buyStock
 );
 
+router.get(
+  "/transactions",
+  passport.authenticate("jwt", { session: false }),
+  stocks.getTransactions
+);
+
 module.exports = router;

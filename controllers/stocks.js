@@ -27,6 +27,7 @@ module.exports.buyStock = catchAsync(async (req, res, next) => {
     user: _id,
     stock: stock._id,
     price: stock.prices[stock.prices.length - 1],
+    quantity: quantity,
     date: new Date(Date.now()),
   });
   await transaction.save();
@@ -36,5 +37,12 @@ module.exports.buyStock = catchAsync(async (req, res, next) => {
   console.log(remainingCash)
   const user = await User.findByIdAndUpdate(_id, { cash: remainingCash });
   console.log(user);
-  res.json({ message: "Bought", cash: remainingCash });
+  res.json({ message: "Bought", cash: remainingCash, transaction: transaction });
 });
+
+// Get list of all transaction for a user
+module.exports.getTransactions = catchAsync(async(req, res, next) => {
+  const {_id} = req.user;
+  const transactions = await Transaction.find({user: _id})
+  res.json({transactions})
+})
