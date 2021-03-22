@@ -61,7 +61,6 @@ const seedStocks = async () => {
       symbol: result.symbol,
       companyName: result.companyName,
       prices: [result.latestPrice],
-      lastUpdated: new Date(Date.now()),
     });
     await stock.save();
   }

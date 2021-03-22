@@ -10,10 +10,6 @@ const stockSchema = Schema({
     type: String,
     required: true,
   },
-  lastUpdated: {
-    type: Date,
-    required: true,
-  },
   prices: [Number],
 });
 

@@ -12,9 +12,20 @@ module.exports.allStocks = catchAsync(async (req, res, next) => {
 // Buy a stock
 module.exports.buyStock = catchAsync(async (req, res, next) => {
   console.log(req.body);
-  const { symbol, quantity } = req.body;
+  const quantity = req.body.quantity;
+  const symbol = req.body.stock.symbol;
   const { cash, _id } = req.user;
-  const stock = await Stock.findOne({ symbol });
+  let stock = await Stock.findOne({ symbol });
+
+  // If stock not in database add new entry
+  if (!stock) {
+    const newStock = new Stock({
+      symbol,
+      companyName: req.body.stock.companyName,
+      prices: req.body.stock.prices,
+    });
+    stock = await newStock.save();
+  }
 
   // Check if user can afford the purchase
   const totalPrice = quantity * stock.prices[stock.prices.length - 1];
@@ -34,15 +45,19 @@ module.exports.buyStock = catchAsync(async (req, res, next) => {
 
   // Reduce cash of user
   const remainingCash = (cash - totalPrice).toFixed(2);
-  console.log(remainingCash)
-  const user = await User.findByIdAndUpdate(_id, { cash: remainingCash });
-  console.log(user);
-  res.json({ message: "Bought", cash: remainingCash, transaction: transaction });
+  console.log(remainingCash);
+  await User.findByIdAndUpdate(_id, { cash: remainingCash });
+  res.json({
+    message: "Bought",
+    cash: remainingCash,
+    transaction: transaction,
+    newId: stock._id,
+  });
 });
 
 // Get list of all transaction for a user
-module.exports.getTransactions = catchAsync(async(req, res, next) => {
-  const {_id} = req.user;
-  const transactions = await Transaction.find({user: _id})
-  res.json({transactions})
-})
+module.exports.getTransactions = catchAsync(async (req, res, next) => {
+  const { _id } = req.user;
+  const transactions = await Transaction.find({ user: _id });
+  res.json({ transactions });
+});

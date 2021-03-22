@@ -41,5 +41,6 @@ const updatePrices = async () => {
   }
 };
 
-updatePrices();
-console.log("DONE");
+updatePrices().then(() => {
+  console.log("DONE");
+})
