@@ -27,10 +27,24 @@ module.exports.buyStock = catchAsync(async (req, res, next) => {
     stock = await newStock.save();
   }
 
-  // Check if user can afford the purchase
   const totalPrice = quantity * stock.prices[stock.prices.length - 1];
-  if (totalPrice > cash) {
-    res.status(400).json({ message: "Cannot afford" });
+  if (quantity > 0) {
+    // Check if user can afford the purchase
+    if (totalPrice > cash) {
+      res.status(400).json({ message: "Cannot afford" });
+    }
+  } else if (quantity === 0) {
+    res.status(400).json({ message: "Quantity cannot be 0" });
+  } else {
+    // If negative check user has the required quantity of stocks to sell
+    const transactions = await Transaction.find({user: _id, stock: stock._id})
+    let ownedQuantity = 0;
+    for (let transaction of transactions) {
+      ownedQuantity += transaction.quantity;
+    }
+    if (quantity > ownedQuantity) {
+      res.status(400).json({ message: "You do not have that many to sell" });
+    }
   }
 
   // Save transaction
