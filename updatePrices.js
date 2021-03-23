@@ -1,21 +1,22 @@
 require("dotenv").config();
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 const axios = require("axios");
 const Stock = require("./models/stock");
+const fs = require("fs");
 
 // Database connection
-const dbUrl = process.env.DB_URL || "mongodb://localhost/stocks";
-mongoose.connect(dbUrl, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-});
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "db connection error"));
-db.once("open", () => {
-  console.log(`${dbUrl} connected`);
-});
+// const dbUrl = process.env.DB_URL || "mongodb://localhost/stocks";
+// mongoose.connect(dbUrl, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+//   useCreateIndex: true,
+//   useFindAndModify: false,
+// });
+// const db = mongoose.connection;
+// db.on("error", console.error.bind(console, "db connection error"));
+// db.once("open", () => {
+//   console.log(`${dbUrl} connected`);
+// });
 
 const updatePrices = async () => {
   // Find all stocks in database
@@ -41,6 +42,28 @@ const updatePrices = async () => {
   }
 };
 
-updatePrices().then(() => {
-  console.log("DONE");
-})
+// updatePrices().then(() => {
+//   console.log("DONE");
+// })
+
+module.exports = () => {
+  fs.readFile("./updated.json", (err, file) => {
+    const json = JSON.parse(file);
+    const lastUpdated = json.updated;
+    const now = Date.now();
+
+    // Run if at least 23.5 hours since last update
+    if (now > lastUpdated + 1000 * 60 * 60 * 23.5) {
+      fs.writeFile(
+        "./updated.json",
+        JSON.stringify({ "updated": now }),
+        "utf8",
+        (err) => {
+          // Update prices in database
+          updatePrices()
+          console.log("UPDATED DB PRICES")
+        }
+      );
+    }
+  });
+};

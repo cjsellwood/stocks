@@ -10,6 +10,13 @@ const methodOverride = require("method-override");
 const cors = require("cors");
 const compression = require("compression");
 const helmet = require("helmet");
+const cron = require("node-cron")
+const passport = require("passport");
+const User = require("./models/user");
+const JwtStrategy = require("passport-jwt").Strategy;
+const ExtractJwt = require("passport-jwt").ExtractJwt;
+const ExpressError = require("./utils/ExpressError");
+const update = require("./updatePrices")
 
 // Routes from routes folder
 const indexRouter = require("./routes/index");
@@ -53,20 +60,13 @@ app.use(compression());
 app.use(helmet());
 
 // Passport with jwt configuration
-const passport = require("passport");
-const User = require("./models/user");
-const JwtStrategy = require("passport-jwt").Strategy;
-const ExtractJwt = require("passport-jwt").ExtractJwt;
-const ExpressError = require("./utils/ExpressError");
 const opts = {};
-
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 opts.secretOrKey = process.env.JWT_PRIVATE;
 
 passport.use(
   new JwtStrategy(opts, async (payload, done) => {
     const user = await User.findOne({ _id: payload.sub });
-    console.log(payload);
     if (user) {
       return done(null, user);
     } else {
@@ -80,6 +80,14 @@ app.use(passport.initialize());
 // Use defined routes
 app.use("/", indexRouter);
 app.use("/stocks", stocksRouter);
+
+// Run update prices on schedule every hour incase of crash
+cron.schedule("0 0 * * * *", () => {
+  console.log(`Time is: ${new Date((Date.now()))}`)
+
+  // Will only update db if last updated more than 23.5 hours ago
+  update();
+})
 
 // Handle undefined route error
 app.use("*", (req, res, next) => {
