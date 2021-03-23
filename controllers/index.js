@@ -12,7 +12,7 @@ module.exports.home = (req, res) => {
 
 // Register new user
 module.exports.registerUser = catchAsync(async (req, res, next) => {
-  const { username, password, confirmPassword } = req.body;
+  const { username, password } = req.body;
 
   // Hash password and store user in database
   const hashedPassword = await bcrypt.hash(password, 12);
@@ -26,7 +26,7 @@ module.exports.registerUser = catchAsync(async (req, res, next) => {
     await user.save();
   } catch (err) {
     if (err.code === 11000) {
-      return res.status(400).json({ message: "Username already exists" });
+      return next(new ExpressError(400, "Username already exists"))
     } else {
       return;
     }
@@ -49,9 +49,9 @@ module.exports.loginUser = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ username: username });
 
   if (!user) {
-    res.status(400).json({ message: "Incorrect username or password" });
+    return next(new ExpressError(404, "Incorrect username or password"))
   }
-  const isValid = bcrypt.compare(password, user.password);
+  const isValid = await bcrypt.compare(password, user.password);
 
   // If username and password correct, issue JWT token
   if (isValid) {
@@ -63,14 +63,15 @@ module.exports.loginUser = catchAsync(async (req, res, next) => {
       cash: user.cash
     });
   } else {
-    res.status(401).json({ message: "Incorrect username or password" });
+    // res.status(404).json({ message: "Incorrect username or password" });
+    return next(new ExpressError(404, "Incorrect username or password"))
   }
 });
 
 // Get search results
 module.exports.search = catchAsync(async (req, res, next) => {
-  const { symbol } = req.query;
-  console.log(symbol);
+  const { symbol } = req.body;
+
   // Lookup stock in database first
   const stock = await Stock.findOne({ symbol: symbol.toUpperCase() });
 
@@ -81,16 +82,10 @@ module.exports.search = catchAsync(async (req, res, next) => {
         `https://cloud.iexapis.com/stable/stock/${symbol}/quote?token=${process.env.API_KEY}`
       )
       .then((response) => {
-        console.log("response", response.data);
-        // Send error if not found
-        // if (!response.data) {
-        //   // const err = {message: "Not found"}
-        //   // return next(new Error("Not Found!!!"));
-        //   // return next(new ExpressError(404, "Not Found"))
-        //   console.log("not found error")
-        //   return next(err);
-        //   // return res.status(404).json({message: "Not found"})
-        // }
+        // If no company name in response, throw error
+        if (response.data.volume === 0) {
+          return next(new ExpressError(404, `${symbol} is no longer traded`))
+        }
         const fetchedStock = {
           symbol: response.data.symbol,
           companyName: response.data.companyName,
@@ -99,7 +94,11 @@ module.exports.search = catchAsync(async (req, res, next) => {
         res.json(fetchedStock)
       })
       .catch((err) => {
-        return next(new ExpressError(404, "Not found"));
+        if (err.response.status === 404) {
+          return next(new ExpressError(404, `${symbol} is not a stock symbol`));
+        } else {
+          return next(new ExpressError(400, "Something went wrong"))
+        }
       });
   } else {
     res.json(stock);

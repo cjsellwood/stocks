@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const stocks = require("../controllers/stocks");
+const {validateBuyStock} = require("../middleware")
 
 router.get(
   "/",
@@ -11,6 +12,7 @@ router.get(
 
 router.post(
   "/buy",
+  validateBuyStock,
   passport.authenticate("jwt", { session: false }),
   stocks.buyStock
 );

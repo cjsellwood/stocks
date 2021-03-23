@@ -57,6 +57,7 @@ const passport = require("passport");
 const User = require("./models/user");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
+const ExpressError = require("./utils/ExpressError");
 const opts = {};
 
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
@@ -79,6 +80,11 @@ app.use(passport.initialize());
 // Use defined routes
 app.use("/", indexRouter);
 app.use("/stocks", stocksRouter);
+
+// Handle undefined route error
+app.use("*", (req, res, next) => {
+  return next(new ExpressError(404, "Route does not exist"))
+})
 
 // Error handler
 app.use((err, req, res, next) => {

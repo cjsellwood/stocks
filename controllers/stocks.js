@@ -11,7 +11,6 @@ module.exports.allStocks = catchAsync(async (req, res, next) => {
 
 // Buy a stock
 module.exports.buyStock = catchAsync(async (req, res, next) => {
-  console.log(req.body);
   const quantity = req.body.quantity;
   const symbol = req.body.stock.symbol;
   const { cash, _id } = req.user;
@@ -37,7 +36,10 @@ module.exports.buyStock = catchAsync(async (req, res, next) => {
     res.status(400).json({ message: "Quantity cannot be 0" });
   } else {
     // If negative check user has the required quantity of stocks to sell
-    const transactions = await Transaction.find({user: _id, stock: stock._id})
+    const transactions = await Transaction.find({
+      user: _id,
+      stock: stock._id,
+    });
     let ownedQuantity = 0;
     for (let transaction of transactions) {
       ownedQuantity += transaction.quantity;
@@ -59,7 +61,6 @@ module.exports.buyStock = catchAsync(async (req, res, next) => {
 
   // Reduce cash of user
   const remainingCash = (cash - totalPrice).toFixed(2);
-  console.log(remainingCash);
   await User.findByIdAndUpdate(_id, { cash: remainingCash });
   res.json({
     message: "Bought",

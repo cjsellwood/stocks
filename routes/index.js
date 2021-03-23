@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const index = require("../controllers/index");
-const { validateRegister, validateLogin } = require("../middleware");
+const { validateRegister, validateLogin, validateSearch } = require("../middleware");
 
 router.get("/", index.home);
 
@@ -13,8 +13,9 @@ router.post("/register", validateRegister, index.registerUser);
 router.post("/login", validateLogin, index.loginUser);
 
 // Return search results
-router.get(
+router.post(
   "/search",
+  validateSearch,
   passport.authenticate("jwt", { session: false }),
   index.search
 );
