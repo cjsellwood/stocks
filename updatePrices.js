@@ -43,27 +43,28 @@ const updatePrices = async () => {
 };
 
 // updatePrices().then(() => {
-//   console.log("DONE");
+//   console.log("DONE", Date.now());
 // })
 
 module.exports = () => {
-  fs.readFile("./updated.json", (err, file) => {
+  fs.readFile("./updated.json", async (err, file) => {
     const json = JSON.parse(file);
     const lastUpdated = json.updated;
     const now = Date.now();
 
     // Run if at least 23.5 hours since last update
     if (now > lastUpdated + 1000 * 60 * 60 * 23.5) {
-      fs.writeFile(
-        "./updated.json",
-        JSON.stringify({ "updated": now }),
-        "utf8",
-        (err) => {
-          // Update prices in database
-          updatePrices()
-          console.log("UPDATED DB PRICES")
-        }
-      );
+      // Update prices in database
+      updatePrices().then(() => {
+        fs.writeFile(
+          "./updated.json",
+          JSON.stringify({ updated: now }),
+          "utf8",
+          (err) => {
+            console.log("UPDATED DB PRICES");
+          }
+        );
+      });
     }
   });
 };
