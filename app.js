@@ -33,7 +33,7 @@ mongoose.connect(dbUrl, {
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "db connection error"));
 db.once("open", () => {
-  console.log(`${dbUrl} connected`);
+  console.log(`DB connected`);
 });
 
 // Parse requests
