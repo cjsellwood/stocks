@@ -5,7 +5,7 @@ const catchAsync = require("../utils/catchAsync");
 const issueJWT = require("../utils/issueJWT");
 const Stock = require("../models/stock");
 const ExpressError = require("../utils/ExpressError")
-const updatePrices = require("../")
+const updatePrices = require("../updatePrices")
 
 module.exports.home = (req, res) => {
   res.json({ page: "Home" });

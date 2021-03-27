@@ -1,5 +1,5 @@
 require("dotenv").config();
-const mongoose = require("mongoose");
+// const mongoose = require("mongoose");
 const axios = require("axios");
 const Stock = require("./models/stock");
 const fs = require("fs");
