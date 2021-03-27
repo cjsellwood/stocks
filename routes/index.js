@@ -20,4 +20,6 @@ router.post(
   index.search
 );
 
+router.get("/updateprices", index.updatePrices)
+
 module.exports = router;

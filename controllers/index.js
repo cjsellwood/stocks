@@ -5,6 +5,7 @@ const catchAsync = require("../utils/catchAsync");
 const issueJWT = require("../utils/issueJWT");
 const Stock = require("../models/stock");
 const ExpressError = require("../utils/ExpressError")
+const updatePrices = require("../")
 
 module.exports.home = (req, res) => {
   res.json({ page: "Home" });
@@ -104,3 +105,15 @@ module.exports.search = catchAsync(async (req, res, next) => {
     res.json(stock);
   }
 });
+
+// Run update prices function when requested by app engine cron
+module.exports.updatePrices = catchAsync( async (req, res, next) => {
+  // Only run if from app engine cron
+  if (req.header("X-Appengine-Cron")) {
+    console.log(req.headers)
+    await updatePrices();
+    res.status(200).json({"message": "Updated"})
+  } else {
+    return next(new ExpressError(400, "Can not access"))
+  }
+})

@@ -1,0 +1,5 @@
+cron: 
+- description: "Update stock prices"
+  url: /updateprices
+  schedule: every day 12:00
+  timezone: Australia/Melbourne

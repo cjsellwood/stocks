@@ -81,13 +81,13 @@ app.use(passport.initialize());
 app.use("/", indexRouter);
 app.use("/stocks", stocksRouter);
 
-// Run update prices on schedule every hour incase of crash
-cron.schedule("0 0 * * * *", () => {
-  console.log(`Time is: ${new Date((Date.now()))}`)
+// // Run update prices on schedule every hour incase of crash
+// cron.schedule("0 0 * * * *", () => {
+//   console.log(`Time is: ${new Date((Date.now()))}`)
 
-  // Will only update db if last updated more than 23.5 hours ago
-  update();
-})
+//   // Will only update db if last updated more than 23.5 hours ago
+//   update();
+// })
 
 // Handle undefined route error
 app.use("*", (req, res, next) => {

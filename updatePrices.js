@@ -1,5 +1,5 @@
 require("dotenv").config();
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 const axios = require("axios");
 const Stock = require("./models/stock");
 const fs = require("fs");
@@ -42,29 +42,31 @@ const updatePrices = async () => {
   }
 };
 
+module.exports = updatePrices;
+
 // updatePrices().then(() => {
 //   console.log("DONE", Date.now());
 // })
 
-module.exports = () => {
-  fs.readFile("./updated.json", async (err, file) => {
-    const json = JSON.parse(file);
-    const lastUpdated = json.updated;
-    const now = Date.now();
+// module.exports = () => {
+//   fs.readFile("./updated.json", async (err, file) => {
+//     const json = JSON.parse(file);
+//     const lastUpdated = json.updated;
+//     const now = Date.now();
 
-    // Run if at least 23.5 hours since last update
-    if (now > lastUpdated + 1000 * 60 * 60 * 23.5) {
-      // Update prices in database
-      updatePrices().then(() => {
-        fs.writeFile(
-          "./updated.json",
-          JSON.stringify({ updated: now }),
-          "utf8",
-          (err) => {
-            console.log("UPDATED DB PRICES");
-          }
-        );
-      });
-    }
-  });
-};
+//     // Run if at least 23.5 hours since last update
+//     if (now > lastUpdated + 1000 * 60 * 60 * 23.5) {
+//       // Update prices in database
+//       updatePrices().then(() => {
+//         fs.writeFile(
+//           "./updated.json",
+//           JSON.stringify({ updated: now }),
+//           "utf8",
+//           (err) => {
+//             console.log("UPDATED DB PRICES");
+//           }
+//         );
+//       });
+//     }
+//   });
+// };
